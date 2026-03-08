@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Copy, Check, RefreshCw, Sparkles, Minimize2 } from "lucide-react";
 import { clsx } from "clsx";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import type { PromptHistoryEntry, PromptLength } from "@/lib/types";
 
 interface PromptOutputProps {
@@ -21,6 +22,8 @@ const TIER_LIMITS: Record<PromptLength, [number, number]> = {
   detailed: [120, 180],
 };
 
+const SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%";
+
 export function PromptOutput({
   prompt,
   isStreaming,
@@ -32,6 +35,9 @@ export function PromptOutput({
 }: PromptOutputProps) {
   const [copied, setCopied] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
+  const [scrambledText, setScrambledText] = useState<string | null>(null);
+  const scrambleInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+  const prefersReducedMotion = useReducedMotion();
 
   const wordCount = prompt.trim() ? prompt.trim().split(/\s+/).length : 0;
   const charCount = prompt.length;
@@ -39,7 +45,6 @@ export function PromptOutput({
 
   const isOverLimit = wordCount > maxWords && !isStreaming && prompt.length > 0;
   const isUnderRange = wordCount < minWords && !isStreaming && wordCount > 0;
-
   const countColor = isOverLimit ? "#EF4444" : isUnderRange ? "#F59E0B" : "#10B981";
 
   async function handleCopy() {
@@ -74,8 +79,56 @@ export function PromptOutput({
     }
   }
 
+  function handleRegenerate() {
+    if (prefersReducedMotion || !prompt) {
+      onRegenerate();
+      return;
+    }
+    // Scramble current text for 350ms, then fire the new call
+    const steps = 12;
+    const intervalMs = Math.round(350 / steps);
+    let step = 0;
+    scrambleInterval.current = setInterval(() => {
+      step++;
+      setScrambledText(
+        prompt
+          .split("")
+          .map((c) =>
+            c === " " || c === "\n"
+              ? c
+              : SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)]
+          )
+          .join("")
+      );
+      if (step >= steps) {
+        clearInterval(scrambleInterval.current!);
+        setScrambledText(null);
+        onRegenerate();
+      }
+    }, intervalMs);
+  }
+
+  const displayText = scrambledText ?? prompt;
+
+  const paramTags = historyEntry
+    ? [
+        historyEntry.params.genre,
+        historyEntry.params.mood,
+        historyEntry.params.tempo,
+        ...historyEntry.params.timeSignatures.filter((s) => s !== "4/4"),
+        ...historyEntry.params.influences,
+        ...historyEntry.params.chordVoicings,
+        ...historyEntry.params.textures,
+      ].filter(Boolean)
+    : [];
+
   return (
-    <div className="space-y-3 animate-fade-in">
+    <motion.div
+      className="space-y-3"
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, ease: [0.25, 0.1, 0.25, 1] }}
+    >
       {/* Label above */}
       {!isStreaming && prompt && (
         <div className="flex items-center gap-2">
@@ -102,7 +155,7 @@ export function PromptOutput({
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={onRegenerate}
+              onClick={handleRegenerate}
               disabled={isStreaming || isCompressing}
               className={clsx(
                 "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-all duration-200",
@@ -110,7 +163,7 @@ export function PromptOutput({
                 (isStreaming || isCompressing) && "opacity-50 cursor-not-allowed"
               )}
             >
-              <RefreshCw className={clsx("w-3 h-3", isStreaming && "animate-spin")} />
+              <RefreshCw className={clsx("w-3 h-3", (isStreaming || !!scrambledText) && "animate-spin")} />
               Try again
             </button>
             {prompt && !isStreaming && (
@@ -165,8 +218,14 @@ export function PromptOutput({
               Generating...
             </div>
           ) : (
-            <p className="font-mono text-sm leading-relaxed text-primary whitespace-pre-wrap">
-              {prompt}
+            <p
+              className="font-mono text-sm leading-relaxed whitespace-pre-wrap"
+              style={{
+                color: scrambledText ? `${accentColor}70` : "#EAEAF0",
+                transition: "color 0.08s",
+              }}
+            >
+              {displayText}
               {isStreaming && (
                 <span
                   className="inline-block w-0.5 h-4 ml-0.5 animate-pulse-glow align-middle"
@@ -177,26 +236,27 @@ export function PromptOutput({
           )}
         </div>
 
-        {/* Params summary */}
-        {historyEntry && !isStreaming && (
-          <div
-            className="px-5 py-3 border-t flex flex-wrap gap-2"
-            style={{ borderColor: `${accentColor}20` }}
-          >
-            <span className="section-label mr-1 self-center">Params:</span>
-            {[
-              historyEntry.params.genre,
-              historyEntry.params.mood,
-              historyEntry.params.tempo,
-              ...historyEntry.params.timeSignatures.filter((s) => s !== "4/4"),
-              ...historyEntry.params.influences,
-              ...historyEntry.params.chordVoicings,
-              ...historyEntry.params.textures,
-            ]
-              .filter(Boolean)
-              .map((tag, i) => (
-                <span
+        {/* Params summary — staggered reveal */}
+        <AnimatePresence>
+          {historyEntry && !isStreaming && paramTags.length > 0 && (
+            <motion.div
+              className="px-5 py-3 border-t flex flex-wrap gap-2"
+              style={{ borderColor: `${accentColor}20` }}
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: {},
+                visible: { transition: { staggerChildren: 0.04, delayChildren: 0.15 } },
+              }}
+            >
+              <span className="section-label mr-1 self-center">Params:</span>
+              {paramTags.map((tag, i) => (
+                <motion.span
                   key={i}
+                  variants={{
+                    hidden: { opacity: 0, scale: 0.8 },
+                    visible: { opacity: 1, scale: 1, transition: { duration: 0.2, ease: "easeOut" } },
+                  }}
                   className="text-[10px] font-mono px-2 py-0.5 rounded border"
                   style={{
                     borderColor: `${accentColor}30`,
@@ -205,11 +265,12 @@ export function PromptOutput({
                   }}
                 >
                   {tag}
-                </span>
+                </motion.span>
               ))}
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </div>
+    </motion.div>
   );
 }

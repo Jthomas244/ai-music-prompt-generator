@@ -72,4 +72,41 @@
     background: rgba(255, 255, 255, 0.06);
     border-color: rgba(255, 255, 255, 0.12);
   }
+
+  /* Waveform animation bars for generate button loading state */
+  .animate-waveform {
+    animation: waveform 0.7s ease-in-out infinite alternate;
+    transform-origin: bottom;
+  }
+
+  /* Diagonal shimmer sweep for generate button */
+  .animate-shimmer {
+    animation: shimmer 3.5s ease-in-out infinite;
+  }
+}
+
+@keyframes waveform {
+  0% { transform: scaleY(0.2); }
+  100% { transform: scaleY(1); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(350%) skewX(-15deg); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* Respect user's motion preferences — disable all animations */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
