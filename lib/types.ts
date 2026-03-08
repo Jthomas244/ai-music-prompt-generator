@@ -1,3 +1,20 @@
+export type GenreCategory =
+  | "rock-alt"
+  | "electronic"
+  | "hip-hop-rnb"
+  | "world-global"
+  | "atmospheric"
+  | "orchestral-jazz";
+
+export type VoicingCategory =
+  | "bright-open"
+  | "dark-tense"
+  | "groove-soul"
+  | "jazz-modern"
+  | "raw";
+
+export type PromptLength = "concise" | "standard" | "detailed";
+
 export interface Genre {
   id: string;
   label: string;
@@ -5,6 +22,7 @@ export interface Genre {
   description: string;
   color: string;
   subgenres?: string[];
+  category: GenreCategory;
 }
 
 export interface Mood {
@@ -19,12 +37,20 @@ export interface Influence {
   label: string;
   sonic: string;
   genres: string[];
+  searchTerms?: string[];
+}
+
+export interface TimeSignature {
+  id: string;
+  label: string;
+  description: string;
 }
 
 export interface ChordVoicing {
   id: string;
   label: string;
   description: string;
+  category: VoicingCategory;
 }
 
 export interface Tempo {
@@ -37,10 +63,11 @@ export interface GenerateRequest {
   mood: Mood;
   tempo: Tempo;
   influences: Influence[];
-  timeSig: string;
+  timeSignatures: TimeSignature[];
   chordVoicings: ChordVoicing[];
   textures: string[];
   sunoMode: boolean;
+  promptLength: PromptLength;
 }
 
 export interface PromptHistoryEntry {
@@ -52,9 +79,10 @@ export interface PromptHistoryEntry {
     mood: string;
     tempo: string;
     influences: string[];
-    timeSig: string;
+    timeSignatures: string[];
     chordVoicings: string[];
     textures: string[];
     sunoMode: boolean;
+    promptLength: PromptLength;
   };
 }

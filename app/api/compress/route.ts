@@ -1,51 +1,43 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
-import { buildSystemPrompt, buildUserMessage } from "@/lib/prompt-builder";
-import type { GenerateRequest } from "@/lib/types";
+import type { PromptLength } from "@/lib/types";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+const TARGET_WORDS: Record<PromptLength, string> = {
+  concise: "under 70 words",
+  standard: "70-120 words",
+  detailed: "120-180 words",
+};
 
 export async function POST(req: NextRequest) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey || apiKey === "your_key_here") {
-    return NextResponse.json(
-      { error: "ANTHROPIC_API_KEY is not configured. Add it to .env.local." },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "ANTHROPIC_API_KEY is not configured." }, { status: 500 });
   }
 
-  let body: GenerateRequest;
+  let body: { prompt: string; promptLength: PromptLength };
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const { genre, mood, tempo, influences, timeSignatures, chordVoicings, textures, sunoMode, promptLength } = body;
-
-  if (!genre || !mood || !tempo) {
-    return NextResponse.json(
-      { error: "Missing required fields: genre, mood, and tempo are required." },
-      { status: 400 }
-    );
+  const { prompt, promptLength } = body;
+  if (!prompt || !promptLength) {
+    return NextResponse.json({ error: "Missing prompt or promptLength." }, { status: 400 });
   }
+
+  const target = TARGET_WORDS[promptLength] ?? "70-120 words";
 
   try {
     const stream = client.messages.stream({
       model: "claude-sonnet-4-6",
-      max_tokens: 512,
-      system: buildSystemPrompt(sunoMode, promptLength ?? "standard"),
-      messages: [
-        {
-          role: "user",
-          content: buildUserMessage({
-            genre, mood, tempo, influences,
-            timeSignatures: timeSignatures ?? [],
-            chordVoicings, textures, sunoMode,
-            promptLength: promptLength ?? "standard",
-          }),
-        },
-      ],
+      max_tokens: 400,
+      system: `You are an expert at condensing AI music generation prompts.
+Shorten the given prompt to ${target} while preserving the most impactful descriptors — genre, mood, and key sonic textures.
+Output ONLY the shortened prompt text. No explanations, no labels.`,
+      messages: [{ role: "user", content: `Shorten this music prompt to ${target}:\n\n${prompt}` }],
     });
 
     const encoder = new TextEncoder();
@@ -68,10 +60,6 @@ export async function POST(req: NextRequest) {
       headers: { "Content-Type": "text/plain; charset=utf-8", "X-Content-Type-Options": "nosniff" },
     });
   } catch (error) {
-    if (error instanceof Anthropic.AuthenticationError)
-      return NextResponse.json({ error: "Invalid API key. Check your ANTHROPIC_API_KEY in .env.local." }, { status: 401 });
-    if (error instanceof Anthropic.RateLimitError)
-      return NextResponse.json({ error: "Rate limit exceeded. Please wait a moment and try again." }, { status: 429 });
     if (error instanceof Anthropic.APIError)
       return NextResponse.json({ error: `API error: ${error.message}` }, { status: error.status ?? 500 });
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
