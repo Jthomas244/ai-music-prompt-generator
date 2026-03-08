@@ -32,17 +32,27 @@ export function PromptOutput({
   }
 
   return (
-    <div className="rounded-xl border overflow-hidden animate-fade-in" style={{ borderColor: `${accentColor}40` }}>
+    <div className="space-y-3 animate-fade-in">
+      {/* Label above */}
+      {!isStreaming && prompt && (
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-4 h-4" style={{ color: accentColor }} />
+          <p className="text-sm font-medium text-primary">
+            Your prompt is ready — paste this into Suno or any AI music tool
+          </p>
+        </div>
+      )}
+
+    <div className="rounded-2xl border overflow-hidden" style={{ borderColor: `${accentColor}40` }}>
       {/* Header */}
       <div
         className="flex items-center justify-between px-5 py-3 border-b"
         style={{
           background: `${accentColor}10`,
-          borderColor: `${accentColor}30`,
+          borderColor: `${accentColor}25`,
         }}
       >
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4" style={{ color: accentColor }} />
           <span className="section-label" style={{ color: accentColor }}>
             Generated Prompt
           </span>
@@ -57,42 +67,42 @@ export function PromptOutput({
             onClick={onRegenerate}
             disabled={isStreaming}
             className={clsx(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-all",
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-all duration-200",
               "border border-border hover:border-border-strong text-secondary hover:text-primary",
               isStreaming && "opacity-50 cursor-not-allowed"
             )}
           >
             <RefreshCw className={clsx("w-3 h-3", isStreaming && "animate-spin")} />
-            Regenerate
+            Try again
           </button>
           <button
             onClick={handleCopy}
             disabled={!prompt || isStreaming}
             className={clsx(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-all",
+              "flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200",
               !prompt || isStreaming
                 ? "opacity-40 cursor-not-allowed border border-border text-muted"
-                : "border text-sm font-medium"
+                : "shadow-md active:scale-95"
             )}
             style={
               prompt && !isStreaming
                 ? {
-                    borderColor: `${accentColor}60`,
-                    background: `${accentColor}20`,
-                    color: accentColor,
+                    background: accentColor,
+                    color: "#141420",
+                    boxShadow: `0 4px 16px ${accentColor}40`,
                   }
                 : undefined
             }
           >
             {copied ? (
               <>
-                <Check className="w-3 h-3" />
+                <Check className="w-4 h-4" />
                 Copied!
               </>
             ) : (
               <>
-                <Copy className="w-3 h-3" />
-                Copy
+                <Copy className="w-4 h-4" />
+                Copy prompt
               </>
             )}
           </button>
@@ -153,6 +163,7 @@ export function PromptOutput({
             ))}
         </div>
       )}
+    </div>
     </div>
   );
 }

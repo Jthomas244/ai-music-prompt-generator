@@ -17,14 +17,14 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AI Music Prompt Generator",
+  title: "TonePrompt — AI Music Prompt Generator",
   description:
-    "Generate expert-level prompts for AI music platforms like Suno. Select your genre, mood, tempo, and sonic influences — then let Claude craft the perfect prompt.",
-  keywords: ["AI music", "Suno prompts", "music generation", "prompt engineering"],
+    "TonePrompt — Transform musical ideas into expert-level prompts for AI music platforms.",
+  keywords: ["AI music", "Suno prompts", "music generation", "prompt engineering", "TonePrompt"],
   openGraph: {
-    title: "AI Music Prompt Generator",
+    title: "TonePrompt — AI Music Prompt Generator",
     description:
-      "Generate expert-level prompts for AI music platforms like Suno.",
+      "TonePrompt — Transform musical ideas into expert-level prompts for AI music platforms.",
     type: "website",
   },
 };

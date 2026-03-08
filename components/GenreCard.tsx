@@ -14,18 +14,19 @@ export function GenreCard({ genre, selected, onSelect }: GenreCardProps) {
     <button
       onClick={() => onSelect(genre)}
       className={clsx(
-        "relative w-full text-left p-4 rounded-xl transition-all duration-200 group",
+        "relative w-full text-left p-5 rounded-2xl transition-all duration-250 group",
         "border focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20",
         selected
-          ? "border-opacity-60"
-          : "border-border bg-surface hover:bg-surface-hover hover:border-border-strong"
+          ? "border-opacity-70"
+          : "border-border bg-surface hover:bg-surface-hover hover:border-border-strong hover:scale-[1.01]"
       )}
       style={
         selected
           ? {
               borderColor: genre.color,
-              background: `${genre.color}12`,
-              boxShadow: `0 0 20px ${genre.color}20, inset 0 0 20px ${genre.color}08`,
+              background: `${genre.color}1E`,
+              boxShadow: `0 0 28px ${genre.color}35, inset 0 0 28px ${genre.color}10`,
+              transform: "scale(1.01)",
             }
           : undefined
       }
@@ -34,59 +35,45 @@ export function GenreCard({ genre, selected, onSelect }: GenreCardProps) {
       {/* Glow blob on selected */}
       {selected && (
         <div
-          className="absolute inset-0 rounded-xl opacity-10 pointer-events-none"
+          className="absolute inset-0 rounded-2xl opacity-15 pointer-events-none"
           style={{
-            background: `radial-gradient(circle at 30% 50%, ${genre.color}, transparent 70%)`,
+            background: `radial-gradient(circle at 30% 40%, ${genre.color}, transparent 65%)`,
           }}
         />
       )}
 
-      <div className="relative flex flex-col gap-2">
-        {/* Icon + Label row */}
-        <div className="flex items-start justify-between gap-2">
-          <span
-            className="text-2xl leading-none"
-            style={{ color: selected ? genre.color : "#A0A0B0" }}
-          >
-            {genre.icon}
-          </span>
-          {selected && (
-            <span
-              className="text-[10px] font-mono tracking-widest px-1.5 py-0.5 rounded border uppercase"
-              style={{
-                color: genre.color,
-                borderColor: `${genre.color}50`,
-                background: `${genre.color}15`,
-              }}
-            >
-              Selected
-            </span>
-          )}
-        </div>
+      <div className="relative flex flex-col gap-2.5">
+        {/* Icon */}
+        <span
+          className="text-3xl leading-none transition-all duration-250"
+          style={{ color: selected ? genre.color : "#A8A8BC" }}
+        >
+          {genre.icon}
+        </span>
 
-        {/* Label */}
+        {/* Label + description */}
         <div>
           <p
-            className="font-semibold text-sm transition-colors"
-            style={{ color: selected ? genre.color : "#E8E8ED" }}
+            className="font-semibold text-sm transition-colors leading-snug"
+            style={{ color: selected ? genre.color : "#EAEAF0" }}
           >
             {genre.label}
           </p>
-          <p className="text-xs text-muted mt-0.5 leading-relaxed">
+          <p className="text-xs text-muted mt-1 leading-relaxed">
             {genre.description}
           </p>
         </div>
 
         {/* Subgenre tags */}
         {genre.subgenres && (
-          <div className="flex flex-wrap gap-1 mt-1">
+          <div className="flex flex-wrap gap-1">
             {genre.subgenres.slice(0, 2).map((sub) => (
               <span
                 key={sub}
-                className="text-[10px] font-mono px-1.5 py-0.5 rounded text-muted"
+                className="text-[10px] font-mono px-1.5 py-0.5 rounded transition-colors"
                 style={{
-                  background: selected ? `${genre.color}15` : "rgba(255,255,255,0.04)",
-                  color: selected ? `${genre.color}cc` : "#707080",
+                  background: selected ? `${genre.color}18` : "rgba(255,255,255,0.05)",
+                  color: selected ? `${genre.color}cc` : "#78788C",
                 }}
               >
                 {sub}

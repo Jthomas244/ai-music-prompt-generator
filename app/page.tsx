@@ -168,9 +168,9 @@ export default function Home() {
     <div
       className="min-h-screen relative"
       style={{
-        background: `radial-gradient(ellipse at 20% 20%, ${accentColor}08 0%, transparent 50%),
-                     radial-gradient(ellipse at 80% 80%, ${accentColor}05 0%, transparent 40%),
-                     #0A0A0F`,
+        background: `radial-gradient(ellipse at 15% 15%, ${accentColor}0A 0%, transparent 55%),
+                     radial-gradient(ellipse at 85% 85%, ${accentColor}07 0%, transparent 45%),
+                     #141420`,
       }}
     >
       {/* Subtle noise texture */}
@@ -180,27 +180,28 @@ export default function Home() {
         }}
       />
 
-      <div className="relative max-w-4xl mx-auto px-4 py-12 space-y-10">
+      <div className="relative max-w-4xl mx-auto px-4 py-14 space-y-14">
         {/* Header */}
-        <header className="text-center space-y-4">
-          <div className="flex items-center justify-center gap-3 mb-2">
+        <header className="text-center space-y-5">
+          <div className="flex items-center justify-center gap-3">
             <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: `${accentColor}20`, border: `1px solid ${accentColor}40` }}
+              className="w-12 h-12 rounded-2xl flex items-center justify-center"
+              style={{ background: `${accentColor}22`, border: `1px solid ${accentColor}40` }}
             >
-              <Music2 className="w-5 h-5" style={{ color: accentColor }} />
+              <Music2 className="w-6 h-6" style={{ color: accentColor }} />
             </div>
           </div>
-          <h1 className="text-4xl font-bold tracking-tight text-primary">
-            AI Music Prompt Generator
-          </h1>
-          <p className="text-secondary text-base max-w-lg mx-auto leading-relaxed">
-            Engineer expert-level prompts for Suno and other AI music platforms.
-            Select your parameters and let Claude do the heavy lifting.
-          </p>
+          <div className="space-y-2">
+            <h1 className="text-5xl font-bold tracking-tight text-primary">
+              TonePrompt
+            </h1>
+            <p className="text-secondary text-base max-w-md mx-auto leading-relaxed">
+              Describe what you want to hear, and we&apos;ll craft the perfect prompt for Suno and other AI music tools.
+            </p>
+          </div>
 
           {/* Platform toggle in header */}
-          <div className="flex justify-center pt-2">
+          <div className="flex justify-center pt-1">
             <PlatformToggle
               sunoMode={sunoMode}
               onChange={setSunoMode}
@@ -210,21 +211,21 @@ export default function Home() {
         </header>
 
         {/* Section 01 — Genre */}
-        <section className="space-y-4">
-          <div className="flex items-center gap-3">
-            <span
-              className="font-mono text-xs font-bold px-2 py-1 rounded"
-              style={{ background: `${accentColor}20`, color: accentColor }}
-            >
-              01
-            </span>
-            <h2 className="section-label text-sm" style={{ color: accentColor }}>
-              Genre
-            </h2>
-            <div className="flex-1 h-px bg-border" />
-            {!selectedGenre && (
-              <span className="text-xs text-muted">Required</span>
-            )}
+        <section className="space-y-5">
+          <div className="space-y-1">
+            <div className="flex items-center gap-3">
+              <span
+                className="font-mono text-xs font-bold px-2 py-1 rounded"
+                style={{ background: `${accentColor}20`, color: accentColor }}
+              >
+                01
+              </span>
+              <h2 className="section-label" style={{ color: accentColor }}>
+                Genre
+              </h2>
+              <div className="flex-1 h-px bg-border" />
+            </div>
+            <p className="text-sm text-secondary pl-1">Pick the style that fits your vibe.</p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {GENRES.map((genre) => (
@@ -242,21 +243,21 @@ export default function Home() {
         </section>
 
         {/* Section 02 — Mood */}
-        <section className="space-y-4">
-          <div className="flex items-center gap-3">
-            <span
-              className="font-mono text-xs font-bold px-2 py-1 rounded"
-              style={{ background: `${accentColor}20`, color: accentColor }}
-            >
-              02
-            </span>
-            <h2 className="section-label text-sm" style={{ color: accentColor }}>
-              Mood
-            </h2>
-            <div className="flex-1 h-px bg-border" />
-            {!selectedMood && (
-              <span className="text-xs text-muted">Required</span>
-            )}
+        <section className="space-y-5">
+          <div className="space-y-1">
+            <div className="flex items-center gap-3">
+              <span
+                className="font-mono text-xs font-bold px-2 py-1 rounded"
+                style={{ background: `${accentColor}20`, color: accentColor }}
+              >
+                02
+              </span>
+              <h2 className="section-label" style={{ color: accentColor }}>
+                Mood
+              </h2>
+              <div className="flex-1 h-px bg-border" />
+            </div>
+            <p className="text-sm text-secondary pl-1">How should the music feel?</p>
           </div>
           <ChipSelector
             items={MOODS}
@@ -267,21 +268,21 @@ export default function Home() {
         </section>
 
         {/* Section 03 — Tempo */}
-        <section className="space-y-4">
-          <div className="flex items-center gap-3">
-            <span
-              className="font-mono text-xs font-bold px-2 py-1 rounded"
-              style={{ background: `${accentColor}20`, color: accentColor }}
-            >
-              03
-            </span>
-            <h2 className="section-label text-sm" style={{ color: accentColor }}>
-              Tempo
-            </h2>
-            <div className="flex-1 h-px bg-border" />
-            {!selectedTempo && (
-              <span className="text-xs text-muted">Required</span>
-            )}
+        <section className="space-y-5">
+          <div className="space-y-1">
+            <div className="flex items-center gap-3">
+              <span
+                className="font-mono text-xs font-bold px-2 py-1 rounded"
+                style={{ background: `${accentColor}20`, color: accentColor }}
+              >
+                03
+              </span>
+              <h2 className="section-label" style={{ color: accentColor }}>
+                Tempo
+              </h2>
+              <div className="flex-1 h-px bg-border" />
+            </div>
+            <p className="text-sm text-secondary pl-1">How fast or slow should it be?</p>
           </div>
           <ChipSelector
             items={TEMPOS.map((t) => ({ id: t.label, label: t.label }))}
@@ -292,27 +293,30 @@ export default function Home() {
         </section>
 
         {/* Section 04 — Sonic Influences */}
-        <section className="space-y-4">
-          <div className="flex items-center gap-3">
-            <span
-              className="font-mono text-xs font-bold px-2 py-1 rounded"
-              style={{ background: `${accentColor}20`, color: accentColor }}
-            >
-              04
-            </span>
-            <h2 className="section-label text-sm" style={{ color: accentColor }}>
-              Sonic Influences
-            </h2>
-            <div className="flex-1 h-px bg-border" />
-            <span className="text-xs text-muted">
-              {selectedInfluences.length}/3 selected
-            </span>
-          </div>
-          {selectedGenre && (
-            <p className="text-xs text-muted -mt-1">
-              <span style={{ color: accentColor }}>★</span> Highlights show best matches for {selectedGenre.label}
+        <section className="space-y-5">
+          <div className="space-y-1">
+            <div className="flex items-center gap-3">
+              <span
+                className="font-mono text-xs font-bold px-2 py-1 rounded"
+                style={{ background: `${accentColor}20`, color: accentColor }}
+              >
+                04
+              </span>
+              <h2 className="section-label" style={{ color: accentColor }}>
+                Sonic Influences
+              </h2>
+              <div className="flex-1 h-px bg-border" />
+              <span className="text-xs text-muted shrink-0">
+                {selectedInfluences.length}/3
+              </span>
+            </div>
+            <p className="text-sm text-secondary pl-1">
+              Artists whose sound you want to channel — we&apos;ll translate their style, not their name.
+              {selectedGenre && (
+                <span className="text-muted"> Stars (★) are great matches for {selectedGenre.label}.</span>
+              )}
             </p>
-          )}
+          </div>
           <div className="flex flex-wrap gap-2">
             {sortedInfluences.map((inf) => {
               const active = selectedInfluences.includes(inf.id);
@@ -367,18 +371,20 @@ export default function Home() {
         </section>
 
         {/* Section 05 — Advanced */}
-        <section className="space-y-4">
-          <div className="flex items-center gap-3">
-            <span
-              className="font-mono text-xs font-bold px-2 py-1 rounded"
-              style={{ background: `${accentColor}20`, color: accentColor }}
-            >
-              05
-            </span>
-            <h2 className="section-label text-sm" style={{ color: accentColor }}>
-              Advanced Parameters
-            </h2>
-            <div className="flex-1 h-px bg-border" />
+        <section className="space-y-5">
+          <div className="space-y-1">
+            <div className="flex items-center gap-3">
+              <span
+                className="font-mono text-xs font-bold px-2 py-1 rounded"
+                style={{ background: `${accentColor}20`, color: accentColor }}
+              >
+                05
+              </span>
+              <h2 className="section-label" style={{ color: accentColor }}>
+                Fine-Tune Your Sound
+              </h2>
+              <div className="flex-1 h-px bg-border" />
+            </div>
           </div>
           <AdvancedPanel
             timeSig={timeSig}
@@ -403,7 +409,7 @@ export default function Home() {
           <button
             onClick={generate}
             disabled={!canGenerate}
-            className="w-full py-4 rounded-xl text-base font-bold tracking-wide transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 relative overflow-hidden"
+            className="w-full py-5 rounded-2xl text-base font-bold tracking-wide transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 relative overflow-hidden active:scale-[0.99]"
             style={
               canGenerate
                 ? {
@@ -460,7 +466,7 @@ export default function Home() {
         {/* Footer */}
         <footer className="text-center pt-8 pb-4 border-t border-border">
           <p className="text-xs text-muted font-mono">
-            Powered by Claude · Optimized for Suno · Built for prompt engineering
+            TonePrompt · Powered by Claude · Optimized for Suno
           </p>
         </footer>
       </div>

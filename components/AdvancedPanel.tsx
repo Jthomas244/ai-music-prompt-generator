@@ -55,7 +55,7 @@ export function AdvancedPanel({
       {/* Header toggle */}
       <button
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between px-5 py-4 bg-surface hover:bg-surface-hover transition-colors"
+        className="w-full flex items-center justify-between px-5 py-4 bg-surface hover:bg-surface-hover transition-colors duration-200"
       >
         <div className="flex items-center gap-3">
           <ChevronRight
@@ -64,7 +64,12 @@ export function AdvancedPanel({
               open && "rotate-90"
             )}
           />
-          <span className="section-label">Advanced Parameters</span>
+          <div className="text-left">
+            <span className="section-label">Fine-Tune Your Sound</span>
+            <p className="text-xs text-muted mt-0.5">
+              Optional — for when you want extra control
+            </p>
+          </div>
           {activeCount > 0 && (
             <span
               className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full"
@@ -77,8 +82,8 @@ export function AdvancedPanel({
             </span>
           )}
         </div>
-        <span className="text-xs text-muted">
-          {open ? "collapse" : "time sigs · chords · textures"}
+        <span className="text-xs text-muted hidden sm:block">
+          {open ? "collapse ↑" : "expand ↓"}
         </span>
       </button>
 
@@ -87,16 +92,19 @@ export function AdvancedPanel({
         <div className="px-5 pb-5 pt-4 space-y-6 border-t border-border animate-fade-in">
           {/* Time Signatures */}
           <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <span className="section-label">Time Signature</span>
-              {timeSig !== "4/4" && (
-                <span
-                  className="text-[10px] font-mono px-2 py-0.5 rounded-full"
-                  style={{ background: `${accentColor}20`, color: accentColor }}
-                >
-                  {timeSig}
-                </span>
-              )}
+            <div>
+              <div className="flex items-center gap-3">
+                <span className="section-label">Time Signature</span>
+                {timeSig !== "4/4" && (
+                  <span
+                    className="text-[10px] font-mono px-2 py-0.5 rounded-full"
+                    style={{ background: `${accentColor}20`, color: accentColor }}
+                  >
+                    {timeSig}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-muted mt-1">How the beat is counted. Most music is 4/4 — try 7/8 or 5/4 for something unexpected.</p>
             </div>
             <div className="flex flex-wrap gap-2">
               {timeSigItems.map((sig) => (
@@ -129,7 +137,10 @@ export function AdvancedPanel({
 
           {/* Chord Voicings */}
           <div className="space-y-3">
-            <span className="section-label">Chord Voicings</span>
+            <div>
+              <span className="section-label">Chord Voicings</span>
+              <p className="text-xs text-muted mt-1">The harmonic color of your music — pick one or two that match the feeling you&apos;re going for.</p>
+            </div>
             <div className="flex flex-wrap gap-2">
               {chordItems.map((chord) => {
                 const active = selectedChords.includes(chord.id);
@@ -167,9 +178,9 @@ export function AdvancedPanel({
 
           {/* Human Textures */}
           <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <span className="section-label">Human Texture Details</span>
-              <span className="text-xs text-muted">make it sound organic</span>
+            <div>
+              <span className="section-label">Human Textures</span>
+              <p className="text-xs text-muted mt-1">Little imperfections that make AI music sound real — fret slides, tape hiss, timing drift, and more.</p>
             </div>
             <ChipSelector
               items={textureItems}
