@@ -15,6 +15,17 @@ Users select musical parameters through an interactive UI: genre, mood, tempo, s
 
 The difference between a naive prompt and an optimized one is dramatic. Instead of "relaxing math rock," you get a 100–150 word prompt describing tapped clean guitars with slight chorus, interlocking polyrhythmic patterns in 7/8, Lydian-colored harmonics over add9 voicings, analog tape warmth with fret slides and timing drift — the kind of specificity that actually produces interesting music.
 
+**V4 adds the other half of the workflow — and a new interface:** a fixed 440px control panel beside a fluid output panel, warm near-black ground with two flat panel levels, coral and teal accents, Fraunces / IBM Plex type. No gradients, no glow; hierarchy comes from panel levels and spacing.
+
+- **Describe the vibe** — type "chill math rock for studying, toe meets Nujabes, some 7/8, a little trumpet" and Claude fills every control below (structured outputs against the knowledge base's own ids): genre, mood, BPM, key, instrumentation, the feel dials, what to avoid. Artists it recognizes but that aren't in the catalog get profiled on the fly.
+- **Instrumentation, BPM, key, feel, avoid** — instrument chips, an exact BPM (bucketed into the knowledge base's tempo ranges), an optional key, three Energy / Warmth / Complexity dials that only speak up when moved off neutral, and an "Avoid" field that steers the prompt away and seeds the Suno Kit's exclusions.
+- **Presets** — ten curated starting points ("Calm Math Rock for Studying", "Dark Shoegaze Walls", "Late-Night Lo-Fi"…) plus your own: name the current setup, save it, it's a pill next to the curated ones.
+- **Custom influences** — type any artist into the influence search; Claude writes a catalog-style sonic profile so their *sound*, never their name, reaches the prompt. Additions persist across visits.
+- **Refine** — "darker", "swap the trumpet for a Rhodes", "instrumental only": one-line rewrites of the generated prompt, with undo. Shorten is the same mechanism with a length instruction.
+- **Suno Kit** — everything else Suno's Custom mode asks for: three title options, an "Exclude Styles" list specific to the track's risks, and a bracket-tagged structure sheet for the lyrics field (instrumental or vocal).
+- **vs. naive** — a side-by-side with what most people would have typed, so the tool's value is visible rather than implied.
+- **Share links & history** — any setup encodes into a URL (custom influences included); prompt history survives reloads.
+
 ## Why I Built It
 
 I've spent months crafting AI music prompts by hand, learning what descriptors platforms like Suno respond to and which ones produce flat results. This app encodes that knowledge into a system that anyone can use.
@@ -26,28 +37,29 @@ It's also a demonstration of applied prompt engineering — not just writing pro
 ### Architecture
 
 ```
-┌──────────────────────────────────────────────────┐
-│  React Frontend (Next.js)                        │
-│  Genre → Mood → Tempo → Influences → Advanced    │
-└──────────────┬───────────────────────────────────┘
-               │ POST /api/generate
-               ▼
-┌──────────────────────────────────────────────────┐
-│  API Route (server-side)                         │
-│  ┌────────────────┐  ┌───────────────────────┐   │
-│  │ Knowledge Base  │  │ Prompt Builder        │   │
-│  │ Genres, moods,  │→ │ System prompt +       │   │
-│  │ influences,     │  │ user message from     │   │
-│  │ textures, chords│  │ selections            │   │
-│  └────────────────┘  └───────────┬───────────┘   │
-└──────────────────────────────────┼───────────────┘
-                                   │
-                                   ▼
+┌────────────────────────────────────────────────────────────────┐
+│  React Frontend (Next.js) — control panel | output panel       │
+│  Vibe · Avoid · Presets · Genre · Mood + feel · Instruments ·  │
+│  BPM/Key · Influences · Fine-tune → Generate → Refine → Kit    │
+└──────┬──────────┬──────────┬──────────┬──────────┬─────────────┘
+       │          │          │          │          │
+  /api/parse  /api/influence /api/generate /api/refine /api/kit
+  (structured) (structured)  (streamed)   (streamed)  (structured)
+       │          │          │          │          │
+       └──────────┴──────────┴────┬─────┴──────────┘
+                                  │
+                    ┌─────────────▼──────────────┐
+                    │ lib/anthropic.ts           │
+                    │ one client, one model,     │
+                    │ streamTextResponse() +     │
+                    │ parseStructured() (zod)    │
+                    └─────────────┬──────────────┘
+                                  │
                           Anthropic Claude API
-                                   │
-                                   ▼
-                        Generated music prompt
+                            (claude-sonnet-4-6)
 ```
+
+Text routes stream plain-text chunks straight to the browser; the first stream event is awaited server-side so auth and rate-limit failures come back as real HTTP errors instead of a broken stream. Structured routes use the SDK's `messages.parse` with zod schemas built from the knowledge base — the parser literally cannot return a genre id that doesn't exist. The catalog is sent as a cached system block so repeat parses are cheap.
 
 ### The Knowledge Base
 
@@ -84,29 +96,42 @@ The LLM receives a system prompt that encodes prompt engineering best practices:
 |-------|-----------|
 | Framework | Next.js 14 (App Router) |
 | Language | TypeScript (strict mode) |
-| Styling | Tailwind CSS |
-| UI Components | shadcn/ui (customized) |
-| LLM | Anthropic Claude API |
+| Styling | Tailwind CSS (tokens from the visual design spec) |
+| Type | Fraunces · IBM Plex Sans · IBM Plex Mono |
+| Validation | Zod (structured outputs) |
+| LLM | Anthropic Claude API (`claude-sonnet-4-6`) |
 | Deployment | Vercel |
 
 ## Features
 
-### Current (MVP)
-- Interactive genre, mood, tempo, and influence selection
-- Advanced parameters panel (time signatures, chord voicings, human textures)
-- Suno-optimized and platform-agnostic modes
-- LLM-powered prompt generation
-- Copy and regenerate functionality
-- Dynamic genre-colored UI theming
-- Fully responsive design
+### Current (V4)
+- Two-panel layout: fixed control panel (scrolls internally) beside the output
+- Describe-the-vibe intake — free text → every control, via structured outputs
+- Ten curated presets + user-saved presets
+- Genre, mood, feel dials (energy / warmth / complexity), instrumentation, BPM, key, avoid
+- Influence selection with genre-aware recommendations
+- Custom influence lookup for any artist, persisted locally
+- Advanced parameters (time signatures, chord voicings, human textures)
+- Suno-optimized and platform-agnostic modes; concise / standard / detailed length
+- Streaming generation with word-count guardrails
+- Refine with one-line instructions (+ undo), Shorten
+- Suno Kit: titles, exclude-styles, structure tags (instrumental or vocal)
+- Naive-vs-optimized comparison
+- Shareable setup links; prompt history that survives reloads
+- Fully responsive (stacked below 1024px with a fixed action bar), reduced-motion aware
 
-### Planned
-- Smart influence suggestions based on genre affinity
-- Session-based prompt history
-- Before/after comparison (naive vs. optimized prompt)
-- Preset combos ("Calm Math Rock for Studying", "Dark Shoegaze Walls")
-- Prompt length control
-- Custom influence input via LLM lookup
+### Version history
+| Version | What changed |
+|---------|--------------|
+| V1 | Proof of concept — genre/mood/tempo/influences → Claude → prompt |
+| V2 | Expanded genres, influence search, multi-meter time signatures, chord voicings, textures, prompt length, compress |
+| V3 | Motion, responsiveness, atmospheric design overhaul |
+| V4 | Describe-it parser, presets (curated + saved), custom influences, refine, Suno Kit, share links, persistent history, shared API layer; new two-panel visual design with instrumentation, BPM/key, feel dials, and avoid |
+
+### Ideas for later
+- Multiple variations side-by-side (A/B)
+- Section-level prompts (different descriptors per verse/chorus)
+- Export a kit as a single Suno-ready text file
 
 ## Getting Started
 
@@ -144,18 +169,31 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 
 ```
 ├── app/
-│   ├── api/generate/      # Server-side API route for Claude calls
-│   ├── page.tsx            # Main app page
+│   ├── api/
+│   │   ├── generate/       # Selections → streamed style prompt
+│   │   ├── refine/         # Prompt + instruction → streamed rewrite (Shorten uses this too)
+│   │   ├── parse/          # Free text → structured selections
+│   │   ├── influence/      # Artist name → sonic profile
+│   │   └── kit/            # Prompt → titles, exclude styles, structure tags
+│   ├── page.tsx            # Main app page (single selection state)
 │   └── layout.tsx          # Root layout with fonts and metadata
 ├── components/
-│   ├── GenreCard.tsx       # Genre selection cards
-│   ├── ChipSelector.tsx    # Reusable chip/tag selector
-│   ├── AdvancedPanel.tsx   # Collapsible advanced parameters
-│   ├── PromptOutput.tsx    # Output display with copy/regenerate
-│   └── PlatformToggle.tsx  # Suno vs. platform-agnostic toggle
+│   ├── ControlPanel.tsx    # Left panel: vibe, avoid, presets, genre, mood + feel, instruments, BPM/key…
+│   ├── OutputPanel.tsx     # Right panel: output card, refine, meta row, kit, recents
+│   ├── InfluenceSearch.tsx # Influence search with custom-artist lookup
+│   ├── FineTune.tsx        # Collapsible time signatures / chord color / textures
+│   ├── SunoKitPanel.tsx    # Titles / exclude styles / structure
+│   ├── RecentRow.tsx       # Horizontal row of recent prompts
+│   ├── MobileBottomBar.tsx # Fixed action bar below the lg breakpoint
+│   └── ui.tsx              # Label, Chip, Slider, Logo, Waveform primitives
 ├── lib/
-│   ├── knowledge-base.ts   # All curated musical data
-│   ├── prompt-builder.ts   # System prompt and message construction
+│   ├── anthropic.ts        # Shared Claude client, streaming + structured helpers
+│   ├── knowledge-base.ts   # All curated musical data (+ instruments, keys, BPM buckets)
+│   ├── catalog.ts          # Id lists + text catalog for the parser
+│   ├── presets.ts          # One-click starting points
+│   ├── prompt-builder.ts   # System prompt, user message, naive comparison
+│   ├── share.ts            # Selection ↔ URL codec
+│   ├── storage.ts          # localStorage hook
 │   └── types.ts            # TypeScript interfaces
 └── .env.example            # Environment variable template
 ```

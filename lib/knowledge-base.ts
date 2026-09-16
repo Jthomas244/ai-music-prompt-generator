@@ -1,4 +1,4 @@
-import type { Genre, Mood, Influence, ChordVoicing, Tempo, TimeSignature, GenreCategory, VoicingCategory } from "./types";
+import type { Genre, Mood, Influence, ChordVoicing, Tempo, TimeSignature, GenreCategory, VoicingCategory, Instrument, MusicalKey } from "./types";
 
 // ─── Genre Category Labels ────────────────────────────────────────────────────
 
@@ -640,10 +640,57 @@ export const TEXTURES: string[] = TEXTURE_CATEGORIES.flatMap((c) => c.textures);
 // ─── Tempos ───────────────────────────────────────────────────────────────────
 
 export const TEMPOS: Tempo[] = [
-  { label: "Slow (60-80)",      range: "60-80 BPM" },
-  { label: "Chill (80-100)",    range: "80-100 BPM" },
-  { label: "Mid (100-120)",     range: "100-120 BPM" },
-  { label: "Upbeat (120-140)",  range: "120-140 BPM" },
-  { label: "Fast (140-170)",    range: "140-170 BPM" },
-  { label: "Very Fast (170+)",  range: "170+ BPM" },
+  { id: "slow",      label: "Slow (60-80)",      range: "60-80 BPM",   minBpm: 0 },
+  { id: "chill",     label: "Chill (80-100)",    range: "80-100 BPM",  minBpm: 80 },
+  { id: "mid",       label: "Mid (100-120)",     range: "100-120 BPM", minBpm: 100 },
+  { id: "upbeat",    label: "Upbeat (120-140)",  range: "120-140 BPM", minBpm: 120 },
+  { id: "fast",      label: "Fast (140-170)",    range: "140-170 BPM", minBpm: 140 },
+  { id: "very-fast", label: "Very Fast (170+)",  range: "170+ BPM",    minBpm: 170 },
 ];
+
+export const MIN_BPM = 40;
+export const MAX_BPM = 220;
+
+/** The knowledge-base tempo bucket an exact BPM falls into. */
+export function tempoForBpm(bpm: number): Tempo {
+  let match = TEMPOS[0];
+  for (const t of TEMPOS) if (bpm >= t.minBpm) match = t;
+  return match;
+}
+
+// ─── Instrumentation ──────────────────────────────────────────────────────────
+
+export const INSTRUMENTS: Instrument[] = [
+  { id: "electric-guitar",  label: "Electric guitar" },
+  { id: "acoustic-guitar",  label: "Acoustic guitar" },
+  { id: "bass",             label: "Bass" },
+  { id: "live-drums",       label: "Live drums" },
+  { id: "drum-machine",     label: "Drum machine" },
+  { id: "808s",             label: "808s" },
+  { id: "synth-pads",       label: "Synth pads" },
+  { id: "synth-lead",       label: "Synth lead" },
+  { id: "piano",            label: "Piano" },
+  { id: "rhodes",           label: "Rhodes" },
+  { id: "strings",          label: "Strings" },
+  { id: "trumpet",          label: "Trumpet" },
+  { id: "saxophone",        label: "Saxophone" },
+  { id: "harp",             label: "Harp" },
+  { id: "field-recordings", label: "Field recordings" },
+  { id: "vocals",           label: "Vocals" },
+];
+
+// ─── Keys ─────────────────────────────────────────────────────────────────────
+
+const ROOTS = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"];
+
+export const KEYS: MusicalKey[] = ROOTS.flatMap((root) => {
+  const slug = root.toLowerCase().replace("#", "s");
+  return [
+    { id: `${slug}-minor`, label: `${root} minor` },
+    { id: `${slug}-major`, label: `${root} major` },
+  ];
+});
+
+export function keyLabel(id: string): string {
+  return KEYS.find((k) => k.id === id)?.label ?? "";
+}

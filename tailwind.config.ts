@@ -1,5 +1,10 @@
 import type { Config } from "tailwindcss";
 
+/**
+ * Tokens from the TonePrompt visual design spec: warm near-black ground, two flat panel
+ * levels, coral + teal accents (exposed as CSS variables so they can be swapped), and a
+ * three-face type system (Fraunces / IBM Plex Sans / IBM Plex Mono).
+ */
 const config: Config = {
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -9,37 +14,51 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sora: ["var(--font-sora)", "sans-serif"],
-        mono: ["var(--font-space-mono)", "monospace"],
+        serif: ["var(--font-fraunces)", "Georgia", "serif"],
+        sans: ["var(--font-plex-sans)", "system-ui", "sans-serif"],
+        mono: ["var(--font-plex-mono)", "ui-monospace", "monospace"],
       },
       colors: {
-        app: "#141420",
-        primary: "#EAEAF0",
-        secondary: "#A8A8BC",
-        muted: "#78788C",
-        surface: "rgba(255,255,255,0.045)",
-        "surface-hover": "rgba(255,255,255,0.075)",
-        border: "rgba(255,255,255,0.09)",
-        "border-strong": "rgba(255,255,255,0.14)",
+        ground: "#15130F",
+        panel: "#1E1A14",
+        raised: "#262019",
+        primary: "#F4EFE4",
+        secondary: "#A79A85",
+        muted: "#7C7264",
+        output: "#E9E2D3",
+        accent: "rgb(var(--accent-rgb) / <alpha-value>)",
+        accent2: "rgb(var(--accent2-rgb) / <alpha-value>)",
+        line: "rgba(255,255,255,0.08)",
+        "line-strong": "rgba(255,255,255,0.12)",
+        fill: "rgba(255,255,255,0.04)",
+        "fill-hover": "rgba(255,255,255,0.07)",
+        "fill-quiet": "rgba(255,255,255,0.03)",
       },
-      animation: {
-        "fade-in": "fadeIn 0.3s ease-in-out",
-        "slide-down": "slideDown 0.3s ease-out",
-        "pulse-glow": "pulseGlow 2s ease-in-out infinite",
+      borderRadius: {
+        pill: "999px",
+        card: "20px",
+        item: "14px",
+        control: "12px",
+        "control-sm": "10px",
       },
       keyframes: {
-        fadeIn: {
-          "0%": { opacity: "0", transform: "translateY(8px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
-        },
-        slideDown: {
-          "0%": { opacity: "0", maxHeight: "0" },
-          "100%": { opacity: "1", maxHeight: "1000px" },
+        waveform: {
+          "0%": { transform: "scaleY(0.2)" },
+          "100%": { transform: "scaleY(1)" },
         },
         pulseGlow: {
-          "0%, 100%": { opacity: "0.6" },
+          "0%, 100%": { opacity: "0.5" },
           "50%": { opacity: "1" },
         },
+        fadeIn: {
+          "0%": { opacity: "0", transform: "translateY(6px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+      },
+      animation: {
+        waveform: "waveform 0.7s ease-in-out infinite alternate",
+        "pulse-glow": "pulseGlow 1.6s ease-in-out infinite",
+        "fade-in": "fadeIn 0.25s ease-out",
       },
     },
   },

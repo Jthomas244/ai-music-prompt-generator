@@ -1,18 +1,26 @@
 import type { Metadata } from "next";
-import { Sora, Space_Mono } from "next/font/google";
+import { Fraunces, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
 
-const sora = Sora({
+const fraunces = Fraunces({
   subsets: ["latin"],
-  variable: "--font-sora",
-  weight: ["300", "400", "500", "600", "700"],
+  weight: "variable",
+  axes: ["opsz"],
+  variable: "--font-fraunces",
   display: "swap",
 });
 
-const spaceMono = Space_Mono({
+const plexSans = IBM_Plex_Sans({
   subsets: ["latin"],
-  variable: "--font-space-mono",
-  weight: ["400", "700"],
+  weight: ["400", "500", "600"],
+  variable: "--font-plex-sans",
+  display: "swap",
+});
+
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-plex-mono",
   display: "swap",
 });
 
@@ -35,8 +43,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${sora.variable} ${spaceMono.variable}`}>
-      <body className="font-sora bg-app text-primary antialiased min-h-screen">
+    <html lang="en" className={`${fraunces.variable} ${plexSans.variable} ${plexMono.variable}`}>
+      <body className="font-sans bg-ground text-primary antialiased min-h-screen">
         {children}
       </body>
     </html>

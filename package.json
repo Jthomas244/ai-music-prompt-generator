@@ -1,6 +1,6 @@
 {
   "name": "ai-music-prompt-generator",
-  "version": "0.1.0",
+  "version": "4.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -9,14 +9,15 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.78.0",
+    "@anthropic-ai/sdk": "^0.126.0",
     "clsx": "^2.1.1",
-    "framer-motion": "^12.35.1",
     "lucide-react": "^0.577.0",
     "next": "14.2.35",
     "react": "^18",
     "react-dom": "^18",
-    "vercel": "^50.28.0"
+    "server-only": "^0.0.1",
+    "vercel": "^50.28.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/node": "^20",

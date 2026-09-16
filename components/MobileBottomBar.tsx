@@ -2,27 +2,29 @@
 
 import { useState } from "react";
 import { Copy, Check, RefreshCw } from "lucide-react";
+import { Waveform } from "./ui";
 
 interface MobileBottomBarProps {
   canGenerate: boolean;
   isStreaming: boolean;
   hasOutput: boolean;
   prompt: string;
-  accentColor: string;
   missingSelections: string;
   onGenerate: () => void;
   onRegenerate: () => void;
+  onJumpToOutput: () => void;
 }
 
+/** Fixed action bar below the lg breakpoint, where the control panel is inline and long. */
 export function MobileBottomBar({
   canGenerate,
   isStreaming,
   hasOutput,
   prompt,
-  accentColor,
   missingSelections,
   onGenerate,
   onRegenerate,
+  onJumpToOutput,
 }: MobileBottomBarProps) {
   const [copied, setCopied] = useState(false);
 
@@ -38,69 +40,23 @@ export function MobileBottomBar({
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-50 md:hidden"
-      style={{
-        paddingBottom: "max(12px, env(safe-area-inset-bottom))",
-        background: "rgba(20, 20, 32, 0.96)",
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
-        borderTop: `1px solid ${accentColor}30`,
-      }}
+      className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-ground/95 backdrop-blur border-t border-line-strong"
+      style={{ paddingBottom: "max(12px, env(safe-area-inset-bottom))" }}
     >
-      <div className="px-4 pt-3 pb-0">
+      <div className="px-4 pt-3 flex gap-2">
         {hasOutput && !isStreaming ? (
-          /* Output visible: Copy + Regenerate */
-          <div className="flex gap-2">
-            <button
-              onClick={handleCopy}
-              disabled={!prompt}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all duration-200 active:scale-95"
-              style={{ background: accentColor, color: "#141420" }}
-            >
-              {copied ? (
-                <><Check className="w-4 h-4" /> Copied!</>
-              ) : (
-                <><Copy className="w-4 h-4" /> Copy Prompt</>
-              )}
+          <>
+            <button type="button" onClick={handleCopy} disabled={!prompt} className="btn-primary flex-1 !py-3 flex items-center justify-center gap-2 text-[14px]">
+              {copied ? <><Check className="w-4 h-4" /> Copied</> : <><Copy className="w-4 h-4" /> Copy prompt</>}
             </button>
-            <button
-              onClick={onRegenerate}
-              disabled={isStreaming}
-              className="px-4 py-3 rounded-xl border text-sm font-medium transition-all active:scale-95"
-              style={{
-                borderColor: `${accentColor}40`,
-                color: accentColor,
-                background: `${accentColor}12`,
-              }}
-            >
+            <button type="button" onClick={onJumpToOutput} className="btn-outline">View</button>
+            <button type="button" onClick={onRegenerate} disabled={isStreaming || !canGenerate} className="btn-outline" aria-label="Regenerate">
               <RefreshCw className="w-4 h-4" />
             </button>
-          </div>
+          </>
         ) : (
-          /* Generate button */
-          <button
-            onClick={onGenerate}
-            disabled={!canGenerate || isStreaming}
-            className="w-full py-3.5 rounded-xl text-sm font-bold transition-all duration-200 active:scale-[0.98]"
-            style={
-              canGenerate
-                ? {
-                    background: `linear-gradient(135deg, ${accentColor}, ${accentColor}cc)`,
-                    color: "#141420",
-                    boxShadow: `0 0 20px ${accentColor}30`,
-                  }
-                : {
-                    background: "rgba(255,255,255,0.06)",
-                    color: "#707080",
-                    cursor: "not-allowed",
-                  }
-            }
-          >
-            {isStreaming
-              ? "Generating..."
-              : canGenerate
-              ? "Generate Prompt →"
-              : `Select ${missingSelections}`}
+          <button type="button" onClick={onGenerate} disabled={!canGenerate || isStreaming} className="btn-primary !py-3 flex items-center justify-center gap-2 text-[14px]">
+            {isStreaming ? <><Waveform bars={5} height={14} /> Generating…</> : canGenerate ? "Generate Prompt" : `Select ${missingSelections}`}
           </button>
         )}
       </div>

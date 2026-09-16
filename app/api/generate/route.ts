@@ -1,18 +1,11 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
+import { apiKeyMissing, missingKeyResponse, streamTextResponse } from "@/lib/anthropic";
 import { buildSystemPrompt, buildUserMessage } from "@/lib/prompt-builder";
+import { tempoForBpm, MIN_BPM, MAX_BPM } from "@/lib/knowledge-base";
 import type { GenerateRequest } from "@/lib/types";
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey || apiKey === "your_key_here") {
-    return NextResponse.json(
-      { error: "ANTHROPIC_API_KEY is not configured. Add it to .env.local." },
-      { status: 500 }
-    );
-  }
+  if (apiKeyMissing()) return missingKeyResponse();
 
   let body: GenerateRequest;
   try {
@@ -21,59 +14,38 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const { genre, mood, tempo, influences, timeSignatures, chordVoicings, textures, sunoMode, promptLength } = body;
+  const { genre, mood, bpm, key, instruments, feel, avoid, influences, timeSignatures, chordVoicings, textures, sunoMode, promptLength, notes } = body;
 
-  if (!genre || !mood || !tempo) {
+  if (!genre || !mood || typeof bpm !== "number" || !Number.isFinite(bpm)) {
     return NextResponse.json(
-      { error: "Missing required fields: genre, mood, and tempo are required." },
+      { error: "Missing required fields: genre, mood, and BPM are required." },
       { status: 400 }
     );
   }
+  const clampedBpm = Math.min(MAX_BPM, Math.max(MIN_BPM, Math.round(bpm)));
 
-  try {
-    const stream = client.messages.stream({
-      model: "claude-sonnet-4-6",
-      max_tokens: 512,
-      system: buildSystemPrompt(sunoMode, promptLength ?? "standard"),
-      messages: [
-        {
-          role: "user",
-          content: buildUserMessage({
-            genre, mood, tempo, influences,
-            timeSignatures: timeSignatures ?? [],
-            chordVoicings, textures, sunoMode,
-            promptLength: promptLength ?? "standard",
-          }),
-        },
-      ],
-    });
-
-    const encoder = new TextEncoder();
-    const readableStream = new ReadableStream({
-      async start(controller) {
-        try {
-          for await (const event of stream) {
-            if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
-              controller.enqueue(encoder.encode(event.delta.text));
-            }
-          }
-          controller.close();
-        } catch (err) {
-          controller.error(err);
-        }
-      },
-    });
-
-    return new Response(readableStream, {
-      headers: { "Content-Type": "text/plain; charset=utf-8", "X-Content-Type-Options": "nosniff" },
-    });
-  } catch (error) {
-    if (error instanceof Anthropic.AuthenticationError)
-      return NextResponse.json({ error: "Invalid API key. Check your ANTHROPIC_API_KEY in .env.local." }, { status: 401 });
-    if (error instanceof Anthropic.RateLimitError)
-      return NextResponse.json({ error: "Rate limit exceeded. Please wait a moment and try again." }, { status: 429 });
-    if (error instanceof Anthropic.APIError)
-      return NextResponse.json({ error: `API error: ${error.message}` }, { status: error.status ?? 500 });
-    return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
-  }
+  const length = promptLength ?? "standard";
+  return streamTextResponse(
+    {
+      system: buildSystemPrompt(sunoMode, length),
+      user: buildUserMessage({
+        genre,
+        mood,
+        tempo: tempoForBpm(clampedBpm),
+        bpm: clampedBpm,
+        key: typeof key === "string" ? key : "",
+        instruments: instruments ?? [],
+        feel: feel ?? { energy: 50, warmth: 50, complexity: 50 },
+        avoid: typeof avoid === "string" ? avoid.slice(0, 200) : undefined,
+        influences: influences ?? [],
+        timeSignatures: timeSignatures ?? [],
+        chordVoicings: chordVoicings ?? [],
+        textures: textures ?? [],
+        sunoMode,
+        promptLength: length,
+        notes: typeof notes === "string" ? notes.slice(0, 600) : undefined,
+      }),
+    },
+    req.signal
+  );
 }
